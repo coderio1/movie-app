@@ -124,14 +124,12 @@ def add_movie():
         movie_storage.add_movie(add_new_movie, add_rating, add_year)
         print(
             Back.GREEN +
-            f"movie {add_new_movie} successfully added\n" +
-            Style.RESET_ALL
+            f"movie {add_new_movie} successfully added\n"
         )
     else:
         print(
             Back.RED +
-            f"movie {add_new_movie} already exists in the list\n" +
-            Style.RESET_ALL
+            f"movie {add_new_movie} already exists in the list\n"
         )
 
 
@@ -162,8 +160,7 @@ def update_movie_rating():
         movie_storage.update_movie(update_movie, new_rating)
         print(
             Back.GREEN +
-            f"{update_movie} rating has been successfully updated\n" +
-            Style.RESET_ALL
+            f"{update_movie} rating has been successfully updated\n"
         )
     else:
         print(Back.RED + f"Error: {update_movie} is not existing in the list")

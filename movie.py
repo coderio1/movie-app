@@ -87,7 +87,7 @@ def menu_options_logic(num):
     elif num == 10:
         list_movie(sorted_by_year_movie(movies))
     else:
-        list_menu()
+        print(Back.RED + "Invalid option. Please enter a number between 0 and 10.")
 
 
 def transform_dict_to_list(enter_dict):

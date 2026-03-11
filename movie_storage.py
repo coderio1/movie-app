@@ -1,51 +1,54 @@
-import json
+# import necesarry libraries
+import os
+from sqlalchemy import create_engine, text
 
-DATA_FILE = "data.json"
+# Build absolute path to the SQLite file
+_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "moviedb.sqlite3")
+_engine = create_engine(f"sqlite:///{_DB_PATH}")
+
+
+# Create the table if it doesn't exist
+with _engine.connect() as _conn:
+    _conn.execute(text("""
+        CREATE TABLE IF NOT EXISTS movies (
+            title TEXT PRIMARY KEY,
+            rate  REAL NOT NULL,
+            year  INTEGER NOT NULL
+        )
+    """))
+    _conn.commit()
 
 
 def get_movies():
-    """Load and return movies dict from JSON file"""
-
-    try:
-        with open(DATA_FILE, "r") as fileobj:
-            return json.load(fileobj)
-    except OSError:
-        print("File not found or not accessible!")
-        return {}
-    except json.JSONDecodeError:
-        print("Corrupted file!")
-        return {}
-
-
-def save_movies(movies):
-    """Write movies dict to JSON file"""
-
-    try:
-        with open(DATA_FILE, "w") as fileobj:
-            json.dump(movies, fileobj, indent=4)
-        # print("...movies successfully saved!")
-    except OSError as e:
-        print("...save function cannot make change on the disk!",e)
+    """Load and return movies from DB"""
+    with _engine.connect() as conn:
+        rows = conn.execute(text("SELECT title, rate, year FROM movies")).fetchall()
+    return {row.title: {"rate": row.rate, "year": row.year} for row in rows}
 
 
 def add_movie(title, rating, year):
-    """Add a new movie entry and persist to storage"""
+    """Add a new movie entry into DB. Create a new table row"""
+    with _engine.connect() as conn:
+        conn.execute(
+            text("INSERT INTO movies (title, rate, year) VALUES (:t, :r, :y)"),
+            {"t": title, "r": rating, "y": year}
+        )
+        conn.commit()
 
-    movies = get_movies()
-    movies[title] = {"rate": rating, "year": year}
-    save_movies(movies)
 
 
 def delete_movie(title):
-    """Remove a movie by title and persist to storage"""
-    movies = get_movies()
-    movies.pop(title)
-    save_movies(movies)
+    """Remove a movie by title from DB. Delete table row"""
+    with _engine.connect() as conn:
+        conn.execute(text("DELETE FROM movies WHERE title = :t"), {"t": title})
+        conn.commit()
 
 
 def update_movie(title, rating):
-    """Update a movie's rating and persist to storage"""
-
-    movies = get_movies()
-    movies[title]["rate"] = rating
-    save_movies(movies)
+    """Update a movie's rating. Update table row"""
+    with _engine.connect() as conn:
+        conn.execute(
+            text("UPDATE movies SET rate = :r WHERE title = :t"),
+            {"r": rating, "t": title}
+        )
+        conn.commit()

@@ -1,5 +1,4 @@
 # Standard library imports
-import os
 import random
 import statistics
 
@@ -26,18 +25,16 @@ def list_menu():
         "++++++++++++++++++++++++++++"
     )
     print(Back.MAGENTA + "Menu:")
+
+    # menu dynamic enumerating
     menu = [
         "Exit", "List movies", "Add movie", "Delete movie",
         "Update movie", "Stats", "Random movie", "Search movie",
         "Movie sorted by rating", "Save histogram",
         "Movie sorted by year"
     ]
-    numbers = [
-        "0.", "1.", "2.", "3.", "4.", "5.", "6.",
-        "7.", "8.", "9.", "10."
-    ]
-    for item, num in zip(menu, numbers):
-        print(Back.MAGENTA + num, item)
+    for num, item in enumerate(menu):
+        print(Back.MAGENTA + f"{num}. {item}")
     print("")
 
 
@@ -54,7 +51,7 @@ def select_menu_options():
 def menu_options_logic(num):
     """Options logic."""
 
-    movies = transform_dict_to_list(movie_storage.get_movies())
+    movies = list(movie_storage.get_movies().items())
     if num == 1:
         list_movie(movies)
     elif num == 2:
@@ -90,15 +87,8 @@ def menu_options_logic(num):
         print(Back.RED + "Invalid option. Please enter a number between 0 and 10.")
 
 
-def transform_dict_to_list(enter_dict):
-    """Transform dict to a list of (movie, data) tuples."""
-
-    movie_list = list(enter_dict.items())
-    return movie_list
-
-
 def list_movie(movie_list):
-    """List all movies from the dictionary"""
+    """List all movies from DB"""
 
     counter = 0
     for movie, data in movie_list:
@@ -286,26 +276,6 @@ def create_rating_histogram(movie_list):
 
 def main():
     """Main program loop"""
-    movies = {
-        "The Shawshank Redemption": {"rate": 9.5,  "year": 1994},
-        "Pulp Fiction":             {"rate": 8.8,  "year": 1994},
-        "The Room":                 {"rate": 3.6,  "year": 2003},
-        "Matrix":                   {"rate": 8.44, "year": 1999},
-        "The Godfather":            {"rate": 9.2,  "year": 1972},
-        "The Godfather: Part II":   {"rate": 9.0,  "year": 1974},
-        "The Dark Knight":          {"rate": 9.0,  "year": 2008},
-        "12 Angry Men":             {"rate": 8.9,  "year": 1957},
-        "Everything Everywhere All At Once": {"rate": 8.9, "year": 2022},
-        "Forrest Gump":             {"rate": 8.8,  "year": 1994},
-        "Star Wars: Episode V":     {"rate": 8.7,  "year": 1980},
-    }
-
-    # Check if file already exists, write if not
-    if not os.path.isfile("data.json"):
-        movie_storage.save_movies(movies)
-    else:
-        print("File already exists!!!")
-
     # Display menu
     list_menu()
 

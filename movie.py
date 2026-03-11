@@ -2,8 +2,14 @@
 import random
 import statistics
 
-# Storage layer
+# HTTP requests
+import requests
+
+# Storage layer DB
 import movie_storage
+
+OMDB_API_KEY = "34ee7f0f"
+OMDB_URL = "http://www.omdbapi.com/"
 
 # Plotting
 import matplotlib.pyplot as plt
@@ -16,6 +22,28 @@ from thefuzz import process
 
 # Automate color reset after every print
 init(autoreset=True)
+
+def fetch_movie_from_omdb(title):
+    """Fetch movie rating and year from OMDb API by title.
+    Returns (title, rating, year) on success, or None on failure."""
+
+    response = requests.get(OMDB_URL, params={"t": title, "apikey": OMDB_API_KEY})
+    data = response.json()
+
+    if data.get("Response") == "False":
+        print(Back.RED + f"OMDb: movie '{title}' not found.")
+        return None
+
+    try:
+        omdb_title = data["Title"]
+        rating = float(data["imdbRating"])
+        year = int(data["Year"][:4])
+    except (KeyError, ValueError):
+        print(Back.RED + "OMDb: could not parse movie data.")
+        return None
+
+    return omdb_title, rating, year
+
 
 def list_menu():
     """List the menu options"""
@@ -101,26 +129,19 @@ def list_movie(movie_list):
 
 
 def add_movie():
-    """Add movie to the list"""
+    """Fetch movie, rating, year from OMDb API and adds movie to the list"""
+    query = input(Fore.BLUE + "Add a new movie on the list: ")
+    if query in movie_storage.get_movies():
+        print(Back.RED + f"movie '{query}' already exists in the list\n")
+        return
 
-    add_new_movie = input(Fore.BLUE + "Add a new movie on the list: ")
-    if add_new_movie not in movie_storage.get_movies():
-        try:
-            add_rating = float(input("Enter movie rating (0-10): "))
-            add_year = int(input("Enter release year: "))
-        except ValueError:
-            print("Error: Invalid input.\n")
-            return
-        movie_storage.add_movie(add_new_movie, add_rating, add_year)
-        print(
-            Back.GREEN +
-            f"movie {add_new_movie} successfully added\n"
-        )
-    else:
-        print(
-            Back.RED +
-            f"movie {add_new_movie} already exists in the list\n"
-        )
+    result = fetch_movie_from_omdb(query)
+    if result is None:
+        return
+
+    title, rating, year = result
+    movie_storage.add_movie(title, rating, year)
+    print(Back.GREEN + f"'{title}' ({year}) rated {rating} successfully added\n")
 
 
 def delete_movie():

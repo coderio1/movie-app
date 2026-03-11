@@ -11,9 +11,10 @@ _engine = create_engine(f"sqlite:///{_DB_PATH}")
 with _engine.connect() as _conn:
     _conn.execute(text("""
         CREATE TABLE IF NOT EXISTS movies (
-            title TEXT PRIMARY KEY,
-            rate  REAL NOT NULL,
-            year  INTEGER NOT NULL
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT UNIQUE NOT NULL,
+            rate REAL NOT NULL,
+            year INTEGER NOT NULL
         )
     """))
     _conn.commit()

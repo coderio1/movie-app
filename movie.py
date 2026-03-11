@@ -18,7 +18,6 @@ from thefuzz import process
 # Automate color reset after every print
 init(autoreset=True)
 
-
 def list_menu():
     """List the menu options"""
     print(
@@ -78,7 +77,7 @@ def menu_options_logic(num):
             f"The worst rating: {worst_movie} {worst_rating:.1f}"
         )
     elif num == 6:
-        recommandation_movie(movies)
+        recommendation_movie(movies)
     elif num == 7:
         search_movie(movies)
     elif num == 8:
@@ -87,8 +86,6 @@ def menu_options_logic(num):
         create_rating_histogram(movies)
     elif num == 10:
         list_movie(sorted_by_year_movie(movies))
-    elif num == 99:
-        search_by_fuzzy(movies)
     else:
         list_menu()
 
@@ -172,7 +169,7 @@ def update_movie_rating():
         print(Back.RED + f"Error: {update_movie} is not existing in the list")
 
 
-def recommandation_movie(movie_list):
+def recommendation_movie(movie_list):
     """Pick and display a random movie recommendation"""
 
     recommendation = random.randint(0, len(movie_list) - 1)

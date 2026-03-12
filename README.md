@@ -99,7 +99,3 @@ If you would like to contribute to this project, please follow these steps:
 5. Submit a pull request detailing your changes
 
 ---
-
-## License
-
-This project is open-source and available under the [MIT License](LICENSE).

@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+bin/
+lib/
+include/
+.env
+
+# IDE
+.idea/
+
+# Generated output
+movies.html
+*.png
+*.jpg
+
+# API key
+omdb_api_key

@@ -25,9 +25,7 @@ from thefuzz import process
 init(autoreset=True)
 
 def fetch_movie_from_omdb(title):
-    """Fetch movie rating and year from OMDb API by title.
-    Returns (title, rating, yea, poster url) on success, or None on failure."""
-
+    """Fetch movie rating and year from OMDb API by title."""
     response = requests.get(OMDB_URL, params={"t": title, "apikey": OMDB_API_KEY})
     data = response.json()
 
@@ -39,11 +37,12 @@ def fetch_movie_from_omdb(title):
         omdb_title = data["Title"]
         rating = float(data["imdbRating"])
         year = int(data["Year"][:4])
+        poster = data["Poster"]
     except (KeyError, ValueError):
         print(Back.RED + "OMDb: could not parse movie data.")
         return None
 
-    return omdb_title, rating, year
+    return omdb_title, rating, year, poster
 
 
 def list_menu():
@@ -124,24 +123,45 @@ def list_movie(movie_list):
         counter += 1
         print(
             f"{counter}. {movie} | "
-            f"rating: {data['rate']} | year: {data['year']}"
+            f"rating: {data['rate']} | year: {data['year']} | poster: {data['poster']} "
         )
     print("\n")
 
 
 def add_movie():
     """Fetch movie, rating, year from OMDb API and adds movie to the list"""
-    query = input(Fore.BLUE + "Add a new movie on the list: ")
+    query = input(Fore.BLUE + "Add a new movie on the list: ").strip()
+
+    if not query:
+        print(Back.RED + "Error: Movie title cannot be empty.\n")
+        return
+
     if query in movie_storage.get_movies():
         print(Back.RED + f"movie '{query}' already exists in the list\n")
         return
 
-    result = fetch_movie_from_omdb(query)
+    try:
+        result = fetch_movie_from_omdb(query)
+    except requests.exceptions.ConnectionError:
+        print(Back.RED + "Error: No internet connection. Could not reach OMDb.\n")
+        return
+    except requests.exceptions.Timeout:
+        print(Back.RED + "Error: Request timed out. Try again later.\n")
+        return
+    except requests.exceptions.RequestException as e:
+        print(Back.RED + f"Error: API request failed: {e}\n")
+        return
+
     if result is None:
         return
 
-    title, rating, year = result
-    movie_storage.add_movie(title, rating, year)
+    title, rating, year, poster = result
+    try:
+        movie_storage.add_movie(title, rating, year, poster)
+    except Exception as e:
+        print(Back.RED + f"Error: Could not save movie to database: {e}\n")
+        return
+
     print(Back.GREEN + f"'{title}' ({year}) rated {rating} successfully added\n")
 
 

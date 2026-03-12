@@ -1,6 +1,7 @@
 # Standard library imports
 import random
 import statistics
+import os
 
 # HTTP requests
 import requests
@@ -25,7 +26,7 @@ init(autoreset=True)
 
 def fetch_movie_from_omdb(title):
     """Fetch movie rating and year from OMDb API by title.
-    Returns (title, rating, year) on success, or None on failure."""
+    Returns (title, rating, yea, poster url) on success, or None on failure."""
 
     response = requests.get(OMDB_URL, params={"t": title, "apikey": OMDB_API_KEY})
     data = response.json()

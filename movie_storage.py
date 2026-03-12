@@ -14,25 +14,24 @@ with _engine.connect() as _conn:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT UNIQUE NOT NULL,
             rate REAL NOT NULL,
-            year INTEGER NOT NULL
+            year INTEGER NOT NULL,
+            poster TEXT
         )
     """))
-    _conn.commit()
-
 
 def get_movies():
     """Load and return movies from DB"""
     with _engine.connect() as conn:
-        rows = conn.execute(text("SELECT title, rate, year FROM movies")).fetchall()
-    return {row.title: {"rate": row.rate, "year": row.year} for row in rows}
+        rows = conn.execute(text("SELECT title, rate, year, poster FROM movies")).fetchall()
+    return {row.title: {"rate": row.rate, "year": row.year, "poster": row.poster} for row in rows}
 
 
-def add_movie(title, rating, year):
+def add_movie(title, rating, year, poster=None):
     """Add a new movie entry into DB. Create a new table row"""
     with _engine.connect() as conn:
         conn.execute(
-            text("INSERT INTO movies (title, rate, year) VALUES (:t, :r, :y)"),
-            {"t": title, "r": rating, "y": year}
+            text("INSERT INTO movies (title, rate, year, poster) VALUES (:t, :r, :y, :p)"),
+            {"t": title, "r": rating, "y": year, "p": poster}
         )
         conn.commit()
 

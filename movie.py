@@ -59,7 +59,7 @@ def list_menu():
         "Exit", "List movies", "Add movie", "Delete movie",
         "Update movie", "Stats", "Random movie", "Search movie",
         "Movie sorted by rating", "Save histogram",
-        "Movie sorted by year"
+        "Movie sorted by year", "Generate website"
     ]
     for num, item in enumerate(menu):
         print(Back.MAGENTA + f"{num}. {item}")
@@ -70,7 +70,7 @@ def select_menu_options():
     """User input for menu selection"""
 
     select_option = int(
-        input(Back.GREEN + "enter your choice (number 0-10): "
+        input(Back.GREEN + "enter your choice (number 0-11): "
               + Style.RESET_ALL)
     )
     return select_option
@@ -111,8 +111,10 @@ def menu_options_logic(num):
         create_rating_histogram(movies)
     elif num == 10:
         list_movie(sorted_by_year_movie(movies))
+    elif num == 11:
+        generate_website(movies)
     else:
-        print(Back.RED + "Invalid option. Please enter a number between 0 and 10.")
+        print(Back.RED + "Invalid option. Please enter a number between 0 and 11.")
 
 
 def list_movie(movie_list):
@@ -314,6 +316,49 @@ def create_rating_histogram(movie_list):
     except Exception as e:
         print(Back.RED + f"\n✗ Error saving histogram: {e}")
         plt.close()
+
+
+def generate_website(movie_list):
+    """Generate an HTML web by means of movies_template.html.
+    Lists movies with posters and ratings"""
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    template_path = os.path.join(script_dir, "movies_template.html")
+    output_path = os.path.join(script_dir, "movies.html")
+
+    try:
+        with open(template_path, "r") as f:
+            template = f.read()
+    except FileNotFoundError:
+        print(Back.RED + "Error: movies_template.html not found.\n")
+        return
+
+    cards_html = ""
+    for title, data in movie_list:
+        if data.get("poster") and data["poster"] != "N/A":
+            image_tag = f'<img class="card__poster" src="{data["poster"]}" alt="{title} poster">'
+        else:
+            image_tag = '<div class="card__poster--placeholder">🎬</div>'
+
+        cards_html += (
+            f'<li class="card">\n'
+            f'    {image_tag}\n'
+            f'    <div class="card__body">\n'
+            f'        <p class="card__title">{title}</p>\n'
+            f'        <p class="card__year">{data["year"]}</p>\n'
+            f'        <p class="card__rating">{data["rate"]}</p>\n'
+            f'    </div>\n'
+            f'</li>\n'
+        )
+
+    html = template.replace("__REPLACE_MOVIE_CARDS__", cards_html)
+
+    try:
+        with open(output_path, "w") as f:
+            f.write(html)
+        print(Back.GREEN + f"Website generated: {output_path}\n")
+    except Exception as e:
+        print(Back.RED + f"Error: Could not write website: {e}\n")
 
 
 def main():
